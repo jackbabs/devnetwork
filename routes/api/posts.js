@@ -14,6 +14,26 @@ const validatePostInput = require('../../validation/post');
 // @access  Public
 router.get('/test', (req, res) => res.json({ msg: 'posts works' }));
 
+// @route   GET api/posts
+// @desc    Get posts
+// @access  Public
+router.get('/', (req, res) => {
+  Post.find()
+  .sort({date: -1})
+  .then(posts => res.json(posts))
+  .catch(err => res.status(404).json({nopostsfound: 'No posts found'}))
+})
+
+// @route   GET api/posts/:id
+// @desc    Get post by id
+// @access  Public
+router.get('/:id', (req, res) => {
+  Post.findById(req.params.id)
+  .then(post => res.json(post))
+  .catch(err => res.status(404).json({nopostfound: 'No post found with that ID'}))
+})
+
+
 // @route   POST api/posts
 // @desc    Create post
 // @access  Private
@@ -39,5 +59,48 @@ router.post(
     newPost.save().then(post => res.json(post));
   }
 );
+
+// @route   POST api/posts/like/:id
+// @desc    Like post
+// @access  Private
+
+router.post(
+  '/like/:id',
+  passport.authenticate('jwt', { session: false }),
+  (req, res) => {
+    const { postId } = req.params
+    Post.findById(postId, (err, foundPost) => {
+      if(!foundPost || err){
+        res.status(404).json({ Error: err, Message: 'Post not found'})
+      }
+      const index = foundPost.likes.findIndex(value => {
+        return value.user == req.user.id
+      })
+      if(index == -1){
+        foundPost.likes.push({ user: req.user.id })
+      } else {
+        foundPost.likes.splice(index, 1)
+      }
+      foundPost.save().then(savedPost => {
+        res.status(200).json(savedPost)
+      })
+    })
+   
+  }
+);
+
+// @route   DELETE api/posts/:id
+// @desc    Delete post
+// @access  Private
+
+router.delete('/:id',  passport.authenticate('jwt', {session: false}), async (req, res) => {
+  try {
+    const post = await Post.findOneAndRemove({ _id: req.params.id, user: req.user.id })
+  } catch (e) {
+    e.status(404).json({ post: 'Unable to delete the post' })
+  } finally {
+    res.status(200).json({ post: 'post deleted' })
+  }
+})
 
 module.exports = router;
