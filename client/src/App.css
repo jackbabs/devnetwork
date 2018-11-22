@@ -41,3 +41,18 @@ img {
 .main-title {
   font-size: 5rem;
 }
+
+.link-button {
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+  display: inline;
+  margin: 0;
+  padding: 0;
+}
+
+.link-button:hover,
+.link-button:focus {
+text-decoration: none;
+outline: none;
+}
