@@ -5,15 +5,17 @@ import { getCurrentProfile, deleteAccount } from '../../actions/profileActions';
 import { Link } from 'react-router-dom';
 import Spinner from '../common/Spinner';
 import ProfileActions from './ProfileActions';
+import Experience from './Experience';
+import Education from './Education';
 
 class Dashboard extends Component {
   componentDidMount() {
     this.props.getCurrentProfile();
   }
 
-  onDeleteClick(e){
-    e.preventDefault()
-    this.props.deleteAccount()
+  onDeleteClick(e) {
+    e.preventDefault();
+    this.props.deleteAccount();
   }
   render() {
     const { user } = this.props.auth;
@@ -28,13 +30,21 @@ class Dashboard extends Component {
       if (Object.keys(profile).length > 0) {
         dashboardContent = (
           <div>
-            <p className="lead text-muted">Welcome <Link to={`/profile/${profile.handle}`}>{user.name}</Link></p>
+            <p className="lead text-muted">
+              Welcome <Link to={`/profile/${profile.handle}`}>{user.name}</Link>
+            </p>
             <ProfileActions />
+            <Experience experience={profile.experience} />
+            <Education education={profile.education} />
             <div style={{ marginBottom: '60px' }} />
-            <button onClick={this.onDeleteClick.bind(this)} className="btn btn-danger">Delete Account</button>
+            <button
+              onClick={this.onDeleteClick.bind(this)}
+              className="btn btn-danger"
+            >
+              Delete Account
+            </button>
           </div>
-        
-        )
+        );
       } else {
         // User is logged in but has no profile
         dashboardContent = (
